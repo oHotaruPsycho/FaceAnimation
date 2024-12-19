@@ -145,16 +145,8 @@ var fcanm = fcanm || (fcanm = {});
     this.addChild(this._eyeSprite);
     this.addChild(this._mouthSprite);
   }
-  var msgNewPage = Window_Message.prototype.newPage;
-  Window_Message.prototype.newPage = function() {
-    // 顔グラの初期化
-    this._faceSprite.bitmap = null;
-    this._mouthSprite.bitmap = null;
-    this._eyeSprite.bitmap = null;
-    msgNewPage.call(this, this._textState);
-  };
 
-  var msgProcChara = Window_Message.prototype.processCharacter
+  var msgProcChara = Window_Message.prototype.processCharacter;
   Window_Message.prototype.processCharacter = function(textState){
     msgProcChara.call(this, this._textState);
     this.procCnt = this.procCnt + 1;
@@ -212,6 +204,8 @@ var fcanm = fcanm || (fcanm = {});
       this._mouthSprite.setFrame(sx3, sy3, sw, sh);
       this._mouthSprite.x = 0 + fcanm.FaceAnimation.offsetX;
       this._mouthSprite.y = (Window_Base._faceHeight + this.lineHeight()/2) - height + fcanm.FaceAnimation.offsetY;
+    }else{
+      this.clearFace();
     }
   }
 
@@ -271,3 +265,25 @@ var fcanm = fcanm || (fcanm = {});
     msgUpd.call(this);
   };
 })();
+
+var msgUpdateClose = Window_Message.prototype.updateClose;
+Window_Message.prototype.updateClose = function() {
+  // 顔グラの初期化
+  if (this._closing) {
+    this.clearFace();
+  }
+  msgUpdateClose.call(this);
+};
+
+var msgOnEndText = Window_Message.prototype.onEndOfText;
+Window_Message.prototype.onEndOfText = function() {
+  // 口を1番最初に戻す
+  this.drawFaceMouth($gameMessage.faceName(), fcanm.FaceAnimation.faceIndex, 0, this._faceSprite.x, this._faceSprite.y, this._faceSprite.width, this._faceSprite.height);
+  msgOnEndText.call(this);
+};
+
+Window_Message.prototype.clearFace = function() {
+  this._faceSprite.bitmap = null;
+  this._mouthSprite.bitmap = null;
+  this._eyeSprite.bitmap = null;
+};
